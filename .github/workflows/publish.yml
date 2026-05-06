@@ -1,4 +1,4 @@
-name: Publish APK to Google Drive
+name: Publish APK
 
 on:
   push:
@@ -10,6 +10,8 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -26,11 +28,18 @@ jobs:
       - name: Set short SHA
         run: echo "SHORT_SHA=${GITHUB_SHA::6}" >> $GITHUB_ENV
 
-      - name: Upload APK to Google Drive
-        uses: adityak74/google-drive-upload-git-action@main
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
         with:
-          credentials: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_KEY }}
-          filename: app/build/outputs/apk/debug/app-debug.apk
-          folderId: ${{ secrets.GDRIVE_FOLDER_ID }}
+          tag_name: build-${{ env.SHORT_SHA }}
+          name: Build ${{ env.SHORT_SHA }}
+          files: app/build/outputs/apk/debug/app-debug.apk
+          make_latest: true
+
+      - name: Upload APK artifact (PRs)
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
           name: launchcal-${{ env.SHORT_SHA }}.apk
-          overwrite: true
+          path: app/build/outputs/apk/debug/app-debug.apk
