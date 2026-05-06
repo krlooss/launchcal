@@ -29,6 +29,7 @@ class LauncherActivity : AppCompatActivity() {
 
     private lateinit var viewPager: ViewPager2
     private lateinit var appAdapter: AppListAdapter
+    private lateinit var favoritesManager: FavoritesManager
     private var calendarAdapter: CalendarAdapter? = null
     private var packageReceiver: BroadcastReceiver? = null
     private var searchBar: EditText? = null
@@ -38,7 +39,8 @@ class LauncherActivity : AppCompatActivity() {
         setContentView(R.layout.activity_launcher)
 
         viewPager = findViewById(R.id.viewPager)
-        appAdapter = AppListAdapter(loadApps())
+        favoritesManager = FavoritesManager(getSharedPreferences("launcher", MODE_PRIVATE))
+        appAdapter = AppListAdapter(loadApps(), favoritesManager)
 
         viewPager.adapter = PagerAdapter()
         viewPager.setCurrentItem(1, false)
