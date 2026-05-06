@@ -23,17 +23,23 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - run: ./gradlew assembleDebug
+      - name: Set version info
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA::6}" >> $GITHUB_ENV
+          echo "VERSION_CODE=${{ github.run_number }}" >> $GITHUB_ENV
+          echo "VERSION_NAME=1.0.${{ github.run_number }}" >> $GITHUB_ENV
 
-      - name: Set short SHA
-        run: echo "SHORT_SHA=${GITHUB_SHA::6}" >> $GITHUB_ENV
+      - run: ./gradlew assembleDebug
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: 1.0.${{ github.run_number }}
 
       - name: Create Release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: build-${{ env.SHORT_SHA }}
-          name: Build ${{ env.SHORT_SHA }}
+          tag_name: v${{ env.VERSION_NAME }}
+          name: v${{ env.VERSION_NAME }} (${{ env.SHORT_SHA }})
           files: app/build/outputs/apk/debug/app-debug.apk
           make_latest: true
 
