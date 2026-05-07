@@ -49,6 +49,11 @@ class LauncherActivity : AppCompatActivity() {
         requestCalendarPermission()
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        viewPager.setCurrentItem(1, true)
+    }
+
     override fun onResume() {
         super.onResume()
         searchBar?.text?.clear()

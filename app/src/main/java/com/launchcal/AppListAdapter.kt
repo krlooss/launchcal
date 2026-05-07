@@ -71,7 +71,6 @@ class AppListAdapter(
                 popup.menu.add("Add to favorites")
             }
             popup.menu.add("App info")
-            popup.menu.add("Uninstall")
 
             popup.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.title) {
@@ -85,12 +84,6 @@ class AppListAdapter(
                     }
                     "App info" -> {
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.parse("package:${app.packageName}")
-                        }
-                        view.context.startActivity(intent)
-                    }
-                    "Uninstall" -> {
-                        val intent = Intent(Intent.ACTION_DELETE).apply {
                             data = Uri.parse("package:${app.packageName}")
                         }
                         view.context.startActivity(intent)
