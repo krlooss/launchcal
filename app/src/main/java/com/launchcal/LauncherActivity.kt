@@ -1,6 +1,7 @@
 package com.launchcal
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -30,17 +31,21 @@ class LauncherActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
     private lateinit var appAdapter: AppListAdapter
     private lateinit var favoritesManager: FavoritesManager
+    private lateinit var calendarPrefs: CalendarPrefs
     private var calendarAdapter: CalendarAdapter? = null
     private var packageReceiver: BroadcastReceiver? = null
     private var searchBar: EditText? = null
     private var calendarDays: Int = 7
+    private var calendarHolder: CalendarViewHolder? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_launcher)
 
         viewPager = findViewById(R.id.viewPager)
-        favoritesManager = FavoritesManager(getSharedPreferences("launcher", MODE_PRIVATE))
+        val prefs = getSharedPreferences("launcher", MODE_PRIVATE)
+        favoritesManager = FavoritesManager(prefs)
+        calendarPrefs = CalendarPrefs(prefs)
         appAdapter = AppListAdapter(loadApps(), favoritesManager)
 
         viewPager.adapter = PagerAdapter()
@@ -81,7 +86,8 @@ class LauncherActivity : AppCompatActivity() {
 
     private fun refreshCalendar() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-            val events = CalendarHelper.getUpcomingEvents(contentResolver, calendarDays)
+            val enabledIds = calendarPrefs.getEnabledCalendarIds()
+            val events = CalendarHelper.getUpcomingEvents(contentResolver, calendarDays, enabledIds)
             calendarAdapter?.updateEvents(events)
         }
     }
@@ -141,6 +147,7 @@ class LauncherActivity : AppCompatActivity() {
         val list: RecyclerView = view.findViewById(R.id.calendarList)
         val empty: TextView = view.findViewById(R.id.calendarEmpty)
         val loadMore: TextView = view.findViewById(R.id.loadMoreButton)
+        val settings: ImageView = view.findViewById(R.id.calendarSettings)
     }
 
     private class AppListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -152,6 +159,7 @@ class LauncherActivity : AppCompatActivity() {
     }
 
     private fun bindCalendar(holder: CalendarViewHolder) {
+        calendarHolder = holder
         val today = DateFormat.format("EEEE, d MMMM", Date()).toString()
             .replaceFirstChar { it.uppercase() }
         holder.header.text = today
@@ -166,11 +174,14 @@ class LauncherActivity : AppCompatActivity() {
             calendarDays += 10
             loadCalendarEvents(holder)
         }
+
+        holder.settings.setOnClickListener { showCalendarPicker() }
     }
 
     private fun loadCalendarEvents(holder: CalendarViewHolder) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-            val events = CalendarHelper.getUpcomingEvents(contentResolver, calendarDays)
+            val enabledIds = calendarPrefs.getEnabledCalendarIds()
+            val events = CalendarHelper.getUpcomingEvents(contentResolver, calendarDays, enabledIds)
             calendarAdapter?.updateEvents(events)
             holder.empty.visibility = if (events.isEmpty()) View.VISIBLE else View.GONE
             holder.list.visibility = if (events.isEmpty()) View.GONE else View.VISIBLE
@@ -178,6 +189,30 @@ class LauncherActivity : AppCompatActivity() {
             holder.empty.visibility = View.VISIBLE
             holder.list.visibility = View.GONE
         }
+    }
+
+    private fun showCalendarPicker() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) return
+
+        val calendars = CalendarHelper.getCalendars(contentResolver)
+        if (calendars.isEmpty()) return
+
+        val enabledIds = calendarPrefs.getEnabledCalendarIds()
+        val names = calendars.map { "${it.name} (${it.accountName})" }.toTypedArray()
+        val checked = calendars.map { enabledIds == null || enabledIds.contains(it.id) }.toBooleanArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Show calendars")
+            .setMultiChoiceItems(names, checked) { _, which, isChecked ->
+                checked[which] = isChecked
+            }
+            .setPositiveButton("OK") { _, _ ->
+                val selected = calendars.filterIndexed { i, _ -> checked[i] }.map { it.id }.toSet()
+                calendarPrefs.setEnabledCalendarIds(selected)
+                calendarHolder?.let { loadCalendarEvents(it) }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun bindAppList(holder: AppListViewHolder) {
