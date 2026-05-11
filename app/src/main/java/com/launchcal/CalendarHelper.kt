@@ -13,6 +13,7 @@ object CalendarHelper {
         val end = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, days) }
 
         val projection = arrayOf(
+            CalendarContract.Instances.EVENT_ID,
             CalendarContract.Events.TITLE,
             CalendarContract.Instances.BEGIN,
             CalendarContract.Instances.END,
@@ -31,11 +32,12 @@ object CalendarHelper {
         val cursor: Cursor? = contentResolver.query(uri, projection, null, null, sortOrder)
         cursor?.use {
             while (it.moveToNext()) {
-                val title = it.getString(0) ?: "No title"
-                val startTime = it.getLong(1)
-                val endTime = it.getLong(2)
-                val allDay = it.getInt(3) == 1
-                events.add(CalendarEvent(title, startTime, endTime, allDay))
+                val id = it.getLong(0)
+                val title = it.getString(1) ?: "No title"
+                val startTime = it.getLong(2)
+                val endTime = it.getLong(3)
+                val allDay = it.getInt(4) == 1
+                events.add(CalendarEvent(id, title, startTime, endTime, allDay))
             }
         }
         return events
