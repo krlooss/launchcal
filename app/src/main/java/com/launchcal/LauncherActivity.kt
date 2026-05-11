@@ -56,6 +56,7 @@ class LauncherActivity : AppCompatActivity() {
 
         registerPackageReceiver()
         requestCalendarPermission()
+        showOnboardingIfNeeded()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -67,11 +68,41 @@ class LauncherActivity : AppCompatActivity() {
         super.onResume()
         searchBar?.text?.clear()
         refreshCalendar()
+        val prefs = getSharedPreferences("launcher", MODE_PRIVATE)
+        if (prefs.getBoolean("onboarding_done", false) && !prefs.getBoolean("launcher_prompt_shown", false)) {
+            promptDefaultLauncher()
+            prefs.edit().putBoolean("launcher_prompt_shown", true).apply()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         packageReceiver?.let { unregisterReceiver(it) }
+    }
+
+    private fun showOnboardingIfNeeded() {
+        val prefs = getSharedPreferences("launcher", MODE_PRIVATE)
+        if (!prefs.getBoolean("onboarding_done", false)) {
+            startActivity(Intent(this, OnboardingActivity::class.java))
+        }
+    }
+
+    private fun promptDefaultLauncher() {
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        val resolveInfo = packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        if (resolveInfo?.activityInfo?.packageName != packageName) {
+            AlertDialog.Builder(this)
+                .setTitle("Default launcher")
+                .setMessage("Set LaunchCal as your default launcher?")
+                .setPositiveButton("Yes") { _, _ ->
+                    val selector = Intent(Intent.ACTION_MAIN)
+                    selector.addCategory(Intent.CATEGORY_HOME)
+                    selector.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(Intent.createChooser(selector, "Select launcher"))
+                }
+                .setNegativeButton("No", null)
+                .show()
+        }
     }
 
     private fun requestCalendarPermission() {

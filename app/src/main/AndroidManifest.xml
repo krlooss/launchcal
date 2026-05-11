@@ -24,6 +24,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".OnboardingActivity"
+            android:theme="@style/LauncherTheme"
+            android:exported="false" />
+
     </application>
 
 </manifest>
