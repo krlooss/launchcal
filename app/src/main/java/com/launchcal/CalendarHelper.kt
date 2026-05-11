@@ -68,7 +68,7 @@ object CalendarHelper {
             .appendPath(end.timeInMillis.toString())
             .build()
 
-        val cursor: Cursor? = contentResolver.query(uri, projection, null, null, sortOrder)
+        val cursor: Cursor? = contentResolver.query(uri, projection, selection, selectionArgs, sortOrder)
         cursor?.use {
             while (it.moveToNext()) {
                 val id = it.getLong(0)
