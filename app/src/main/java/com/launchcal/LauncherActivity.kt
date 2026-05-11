@@ -95,10 +95,8 @@ class LauncherActivity : AppCompatActivity() {
                 .setTitle("Default launcher")
                 .setMessage("Set LaunchCal as your default launcher?")
                 .setPositiveButton("Yes") { _, _ ->
-                    val selector = Intent(Intent.ACTION_MAIN)
-                    selector.addCategory(Intent.CATEGORY_HOME)
-                    selector.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    startActivity(Intent.createChooser(selector, "Select launcher"))
+                    val intent = Intent(android.provider.Settings.ACTION_HOME_SETTINGS)
+                    startActivity(intent)
                 }
                 .setNegativeButton("No", null)
                 .show()
