@@ -41,31 +41,31 @@
         android:background="#1A1A1A">
 
         <ImageView
-            android:id="@+id/dockPhone"
+            android:id="@+id/dockSlot0"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
             android:src="@drawable/ic_dock_phone"
             android:scaleType="centerInside"
-            android:contentDescription="Phone" />
+            android:contentDescription="Dock slot 1" />
 
         <ImageView
-            android:id="@+id/dockBrowser"
+            android:id="@+id/dockSlot1"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
             android:src="@drawable/ic_dock_browser"
             android:scaleType="centerInside"
-            android:contentDescription="Browser" />
+            android:contentDescription="Dock slot 2" />
 
         <ImageView
-            android:id="@+id/dockCamera"
+            android:id="@+id/dockSlot2"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
             android:src="@drawable/ic_dock_camera"
             android:scaleType="centerInside"
-            android:contentDescription="Camera" />
+            android:contentDescription="Dock slot 3" />
 
     </LinearLayout>
 

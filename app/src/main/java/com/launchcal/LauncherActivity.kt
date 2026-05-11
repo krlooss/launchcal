@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import android.text.format.DateFormat
+import android.widget.LinearLayout
 import java.util.Date
 
 class LauncherActivity : AppCompatActivity() {
@@ -32,6 +33,7 @@ class LauncherActivity : AppCompatActivity() {
     private lateinit var appAdapter: AppListAdapter
     private lateinit var favoritesManager: FavoritesManager
     private lateinit var calendarPrefs: CalendarPrefs
+    private lateinit var dockManager: DockManager
     private var calendarAdapter: CalendarAdapter? = null
     private var packageReceiver: BroadcastReceiver? = null
     private var searchBar: EditText? = null
@@ -46,6 +48,7 @@ class LauncherActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("launcher", MODE_PRIVATE)
         favoritesManager = FavoritesManager(prefs)
         calendarPrefs = CalendarPrefs(prefs)
+        dockManager = DockManager(prefs)
         appAdapter = AppListAdapter(loadApps(), favoritesManager)
 
         viewPager.adapter = PagerAdapter()
@@ -153,9 +156,7 @@ class LauncherActivity : AppCompatActivity() {
     private class AppListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val searchBar: EditText = view.findViewById(R.id.searchBar)
         val appList: RecyclerView = view.findViewById(R.id.appList)
-        val dockPhone: ImageView = view.findViewById(R.id.dockPhone)
-        val dockBrowser: ImageView = view.findViewById(R.id.dockBrowser)
-        val dockCamera: ImageView = view.findViewById(R.id.dockCamera)
+        val dockBar: LinearLayout = view.findViewById(R.id.dockBar)
     }
 
     private fun bindCalendar(holder: CalendarViewHolder) {
@@ -228,18 +229,78 @@ class LauncherActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        holder.dockPhone.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_DIAL))
+        setupDock(holder.dockBar)
+    }
+
+    private fun setupDock(dockBar: LinearLayout) {
+        for (i in 0 until DockManager.SLOT_COUNT) {
+            val imageView = dockBar.getChildAt(i) as ImageView
+            bindDockSlot(imageView, i)
+        }
+    }
+
+    private fun bindDockSlot(imageView: ImageView, index: Int) {
+        val item = dockManager.getSlot(index)
+
+        if (dockManager.isDefault(index)) {
+            when (index) {
+                0 -> imageView.setImageResource(R.drawable.ic_dock_phone)
+                1 -> imageView.setImageResource(R.drawable.ic_dock_browser)
+                2 -> imageView.setImageResource(R.drawable.ic_dock_camera)
+            }
+        } else {
+            val icon = try {
+                item.packageName?.let { packageManager.getApplicationIcon(it) }
+            } catch (e: Exception) { null }
+            if (icon != null) {
+                imageView.setImageDrawable(icon)
+            }
         }
 
-        holder.dockBrowser.setOnClickListener {
-            val intent = packageManager.getLaunchIntentForPackage("com.brave.browser")
-                ?: Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.google.com"))
-            startActivity(intent)
+        imageView.setOnClickListener { launchDockItem(index) }
+        imageView.setOnLongClickListener {
+            showDockPicker(index, imageView)
+            true
         }
+    }
 
-        holder.dockCamera.setOnClickListener {
-            startActivity(Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA))
+    private fun launchDockItem(index: Int) {
+        val item = dockManager.getSlot(index)
+        if (dockManager.isDefault(index)) {
+            when (index) {
+                0 -> startActivity(Intent(Intent.ACTION_DIAL))
+                1 -> {
+                    val intent = packageManager.getLaunchIntentForPackage("com.brave.browser")
+                        ?: Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.google.com"))
+                    startActivity(intent)
+                }
+                2 -> startActivity(Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA))
+            }
+        } else {
+            item.packageName?.let { pkg ->
+                val intent = packageManager.getLaunchIntentForPackage(pkg)
+                intent?.let { startActivity(it) }
+            }
         }
+    }
+
+    private fun showDockPicker(slotIndex: Int, imageView: ImageView) {
+        val apps = loadApps()
+        val names = apps.map { it.name }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Choose dock app")
+            .setItems(names) { _, which ->
+                val app = apps[which]
+                dockManager.setSlot(slotIndex, app.packageName, app.activityName, app.name)
+                bindDockSlot(imageView, slotIndex)
+            }
+            .setNeutralButton("Reset") { _, _ ->
+                getSharedPreferences("launcher", MODE_PRIVATE).edit()
+                    .remove("dock_slot_$slotIndex").apply()
+                bindDockSlot(imageView, slotIndex)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }
