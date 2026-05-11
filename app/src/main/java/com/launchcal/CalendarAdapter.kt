@@ -1,5 +1,6 @@
 package com.launchcal
 
+import android.content.ContentUris
 import android.content.Intent
 import android.provider.CalendarContract
 import android.text.format.DateFormat
@@ -98,6 +99,11 @@ class CalendarAdapter(events: List<CalendarEvent>) :
                     val start = DateFormat.format("HH:mm", Date(item.event.startTime))
                     val end = DateFormat.format("HH:mm", Date(item.event.endTime))
                     "$start – $end"
+                }
+                h.itemView.setOnClickListener {
+                    val uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, item.event.id)
+                    val intent = Intent(Intent.ACTION_VIEW).apply { data = uri }
+                    it.context.startActivity(intent)
                 }
             }
         }

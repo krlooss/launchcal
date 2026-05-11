@@ -33,6 +33,7 @@ class LauncherActivity : AppCompatActivity() {
     private var calendarAdapter: CalendarAdapter? = null
     private var packageReceiver: BroadcastReceiver? = null
     private var searchBar: EditText? = null
+    private var calendarDays: Int = 7
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +81,7 @@ class LauncherActivity : AppCompatActivity() {
 
     private fun refreshCalendar() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-            val events = CalendarHelper.getUpcomingEvents(contentResolver)
+            val events = CalendarHelper.getUpcomingEvents(contentResolver, calendarDays)
             calendarAdapter?.updateEvents(events)
         }
     }
@@ -139,6 +140,7 @@ class LauncherActivity : AppCompatActivity() {
         val header: TextView = view.findViewById(R.id.calendarHeader)
         val list: RecyclerView = view.findViewById(R.id.calendarList)
         val empty: TextView = view.findViewById(R.id.calendarEmpty)
+        val loadMore: TextView = view.findViewById(R.id.loadMoreButton)
     }
 
     private class AppListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -158,8 +160,17 @@ class LauncherActivity : AppCompatActivity() {
         holder.list.layoutManager = LinearLayoutManager(this)
         holder.list.adapter = calendarAdapter
 
+        loadCalendarEvents(holder)
+
+        holder.loadMore.setOnClickListener {
+            calendarDays += 10
+            loadCalendarEvents(holder)
+        }
+    }
+
+    private fun loadCalendarEvents(holder: CalendarViewHolder) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-            val events = CalendarHelper.getUpcomingEvents(contentResolver)
+            val events = CalendarHelper.getUpcomingEvents(contentResolver, calendarDays)
             calendarAdapter?.updateEvents(events)
             holder.empty.visibility = if (events.isEmpty()) View.VISIBLE else View.GONE
             holder.list.visibility = if (events.isEmpty()) View.GONE else View.VISIBLE

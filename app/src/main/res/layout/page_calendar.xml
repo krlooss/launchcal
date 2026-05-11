@@ -37,4 +37,15 @@
         android:textSize="16sp"
         android:visibility="gone" />
 
+    <TextView
+        android:id="@+id/loadMoreButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Load more"
+        android:textColor="#AAAAAA"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp" />
+
 </LinearLayout>
