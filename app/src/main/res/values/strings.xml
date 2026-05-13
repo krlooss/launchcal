@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LaunchCal</string>
+    <string name="settings">Settings</string>
+    <string name="calendar_settings">Calendar settings</string>
+    <string name="clock_settings">Clock</string>
+    <string name="calendars">Calendars</string>
+    <string name="system_default">System default</string>
+    <string name="format_12h">12-hour (1:30 PM)</string>
+    <string name="format_24h">24-hour (13:30)</string>
+    <string name="expand">Expand</string>
+    <string name="no_upcoming_events">No upcoming events</string>
+    <string name="load_more">Load more</string>
 </resources>
