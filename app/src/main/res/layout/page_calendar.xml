@@ -33,7 +33,7 @@
             android:layout_height="32dp"
             android:src="@drawable/ic_settings"
             android:scaleType="centerInside"
-            android:contentDescription="Calendar settings" />
+            android:contentDescription="@string/calendar_settings" />
 
     </LinearLayout>
 
@@ -51,7 +51,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="No upcoming events"
+        android:text="@string/no_upcoming_events"
         android:textColor="#888888"
         android:textSize="16sp"
         android:visibility="gone" />
@@ -60,7 +60,7 @@
         android:id="@+id/loadMoreButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Load more"
+        android:text="@string/load_more"
         android:textColor="#AAAAAA"
         android:textSize="14sp"
         android:gravity="center"

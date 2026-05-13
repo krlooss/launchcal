@@ -27,6 +27,8 @@ import android.content.ActivityNotFoundException
 import android.provider.AlarmClock
 import android.widget.LinearLayout
 import android.widget.TextClock
+import androidx.core.content.edit
+import androidx.core.net.toUri
 
 class LauncherActivity : AppCompatActivity() {
 
@@ -72,7 +74,7 @@ class LauncherActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("launcher", MODE_PRIVATE)
         if (prefs.getBoolean("onboarding_done", false) && !prefs.getBoolean("launcher_prompt_shown", false)) {
             promptDefaultLauncher()
-            prefs.edit().putBoolean("launcher_prompt_shown", true).apply()
+            prefs.edit { putBoolean("launcher_prompt_shown", true) }
         }
     }
 
@@ -286,7 +288,7 @@ class LauncherActivity : AppCompatActivity() {
         } else {
             val icon = try {
                 item.packageName?.let { packageManager.getApplicationIcon(it) }
-            } catch (e: Exception) { null }
+            } catch (_: Exception) { null }
             if (icon != null) {
                 imageView.setImageDrawable(icon)
             }
@@ -306,7 +308,7 @@ class LauncherActivity : AppCompatActivity() {
                 0 -> startActivity(Intent(Intent.ACTION_DIAL))
                 1 -> {
                     val intent = packageManager.getLaunchIntentForPackage("com.brave.browser")
-                        ?: Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.google.com"))
+                        ?: Intent(Intent.ACTION_VIEW, "https://www.google.com".toUri())
                     startActivity(intent)
                 }
                 2 -> startActivity(Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA))
@@ -331,8 +333,9 @@ class LauncherActivity : AppCompatActivity() {
                 bindDockSlot(imageView, slotIndex)
             }
             .setNeutralButton("Reset") { _, _ ->
-                getSharedPreferences("launcher", MODE_PRIVATE).edit()
-                    .remove("dock_slot_$slotIndex").apply()
+                getSharedPreferences("launcher", MODE_PRIVATE).edit {
+                    remove("dock_slot_$slotIndex")
+                }
                 bindDockSlot(imageView, slotIndex)
             }
             .setNegativeButton("Cancel", null)

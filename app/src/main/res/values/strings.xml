@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LaunchCal</string>
+    <string name="calendar_settings">Calendar settings</string>
+    <string name="no_upcoming_events">No upcoming events</string>
+    <string name="load_more">Load more</string>
 </resources>
