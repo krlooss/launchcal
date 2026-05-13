@@ -213,7 +213,8 @@ class LauncherActivity : AppCompatActivity() {
             loadCalendarEvents(holder)
         }
 
-        holder.settings.setOnClickListener { showCalendarPicker() }
+        holder.settings.setOnClickListener { showSettings() }
+        applyClockFormat()
     }
 
     private fun loadCalendarEvents(holder: CalendarViewHolder) {
@@ -229,28 +230,97 @@ class LauncherActivity : AppCompatActivity() {
         }
     }
 
-    private fun showCalendarPicker() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) return
+    private fun showSettings() {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_settings, null)
+        val prefs = getSharedPreferences("launcher", MODE_PRIVATE)
 
-        val calendars = CalendarHelper.getCalendars(contentResolver)
-        if (calendars.isEmpty()) return
+        val clockHeader = view.findViewById<View>(R.id.clockSectionHeader)
+        val clockContent = view.findViewById<View>(R.id.clockSectionContent)
+        val clockArrow = view.findViewById<ImageView>(R.id.clockArrow)
+        val calHeader = view.findViewById<View>(R.id.calendarSectionHeader)
+        val calContent = view.findViewById<LinearLayout>(R.id.calendarSectionContent)
+        val calArrow = view.findViewById<ImageView>(R.id.calendarArrow)
 
+        clockHeader.setOnClickListener {
+            val visible = clockContent.visibility == View.VISIBLE
+            clockContent.visibility = if (visible) View.GONE else View.VISIBLE
+            clockArrow.rotation = if (visible) 0f else 180f
+        }
+        calHeader.setOnClickListener {
+            val visible = calContent.visibility == View.VISIBLE
+            calContent.visibility = if (visible) View.GONE else View.VISIBLE
+            calArrow.rotation = if (visible) 0f else 180f
+        }
+
+        val radioGroup = view.findViewById<android.widget.RadioGroup>(R.id.timeFormatGroup)
+        when (prefs.getString("clock_format", "system")) {
+            "12h" -> radioGroup.check(R.id.radio12h)
+            "24h" -> radioGroup.check(R.id.radio24h)
+            else -> radioGroup.check(R.id.radioSystem)
+        }
+
+        val calendars = if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED)
+            CalendarHelper.getCalendars(contentResolver) else emptyList()
         val enabledIds = calendarPrefs.getEnabledCalendarIds()
-        val names = calendars.map { "${it.name} (${it.accountName})" }.toTypedArray()
-        val checked = calendars.map { enabledIds == null || enabledIds.contains(it.id) }.toBooleanArray()
+        val checkBoxes = mutableListOf<android.widget.CheckBox>()
+
+        for (cal in calendars) {
+            val cb = android.widget.CheckBox(this).apply {
+                text = "${cal.name} (${cal.accountName})"
+                isChecked = enabledIds == null || enabledIds.contains(cal.id)
+                setPadding(8, 4, 8, 4)
+            }
+            checkBoxes.add(cb)
+            calContent.addView(cb)
+        }
+
+        if (calendars.isEmpty()) {
+            val empty = TextView(this).apply {
+                text = getString(R.string.no_upcoming_events)
+                setPadding(8, 8, 8, 8)
+            }
+            calContent.addView(empty)
+        }
 
         AlertDialog.Builder(this)
-            .setTitle("Show calendars")
-            .setMultiChoiceItems(names, checked) { _, which, isChecked ->
-                checked[which] = isChecked
-            }
+            .setTitle(R.string.settings)
+            .setView(view)
             .setPositiveButton("OK") { _, _ ->
-                val selected = calendars.filterIndexed { i, _ -> checked[i] }.map { it.id }.toSet()
-                calendarPrefs.setEnabledCalendarIds(selected)
-                calendarHolder?.let { loadCalendarEvents(it) }
+                val format = when (radioGroup.checkedRadioButtonId) {
+                    R.id.radio12h -> "12h"
+                    R.id.radio24h -> "24h"
+                    else -> "system"
+                }
+                prefs.edit { putString("clock_format", format) }
+                applyClockFormat()
+
+                if (calendars.isNotEmpty()) {
+                    val selected = calendars.filterIndexed { i, _ -> checkBoxes[i].isChecked }.map { it.id }.toSet()
+                    calendarPrefs.setEnabledCalendarIds(selected)
+                    calendarHolder?.let { loadCalendarEvents(it) }
+                }
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    private fun applyClockFormat() {
+        val clock = calendarHolder?.clock ?: return
+        val prefs = getSharedPreferences("launcher", MODE_PRIVATE)
+        when (prefs.getString("clock_format", "system")) {
+            "12h" -> {
+                clock.format12Hour = "h:mm a"
+                clock.format24Hour = "h:mm a"
+            }
+            "24h" -> {
+                clock.format12Hour = "HH:mm"
+                clock.format24Hour = "HH:mm"
+            }
+            else -> {
+                clock.format12Hour = "h:mm a"
+                clock.format24Hour = "HH:mm"
+            }
+        }
     }
 
     private fun bindAppList(holder: AppListViewHolder) {
