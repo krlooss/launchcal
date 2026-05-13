@@ -23,9 +23,10 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import android.text.format.DateFormat
+import android.content.ActivityNotFoundException
+import android.provider.AlarmClock
 import android.widget.LinearLayout
-import java.util.Date
+import android.widget.TextClock
 
 class LauncherActivity : AppCompatActivity() {
 
@@ -175,7 +176,7 @@ class LauncherActivity : AppCompatActivity() {
     }
 
     private class CalendarViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val header: TextView = view.findViewById(R.id.calendarHeader)
+        val clock: TextClock = view.findViewById(R.id.calendarClock)
         val list: RecyclerView = view.findViewById(R.id.calendarList)
         val empty: TextView = view.findViewById(R.id.calendarEmpty)
         val loadMore: TextView = view.findViewById(R.id.loadMoreButton)
@@ -190,9 +191,14 @@ class LauncherActivity : AppCompatActivity() {
 
     private fun bindCalendar(holder: CalendarViewHolder) {
         calendarHolder = holder
-        val today = DateFormat.format("EEEE, d MMMM", Date()).toString()
-            .replaceFirstChar { it.uppercase() }
-        holder.header.text = today
+
+        holder.clock.setOnClickListener {
+            try {
+                startActivity(Intent(AlarmClock.ACTION_SHOW_ALARMS))
+            } catch (_: ActivityNotFoundException) {
+                startActivity(Intent(android.provider.Settings.ACTION_DATE_SETTINGS))
+            }
+        }
 
         calendarAdapter = CalendarAdapter(emptyList())
         holder.list.layoutManager = LinearLayoutManager(this)

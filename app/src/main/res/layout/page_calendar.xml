@@ -16,13 +16,15 @@
         android:gravity="center_vertical"
         android:paddingBottom="16dp">
 
-        <TextView
-            android:id="@+id/calendarHeader"
+        <TextClock
+            android:id="@+id/calendarClock"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:format12Hour="h:mm a"
+            android:format24Hour="HH:mm"
             android:textColor="@android:color/white"
-            android:textSize="24sp"
+            android:textSize="32sp"
             android:textStyle="bold" />
 
         <ImageView
