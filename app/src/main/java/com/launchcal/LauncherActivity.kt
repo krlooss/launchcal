@@ -186,6 +186,7 @@ class LauncherActivity : AppCompatActivity() {
 
     private class AppListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val searchBar: EditText = view.findViewById(R.id.searchBar)
+        val searchClear: ImageView = view.findViewById(R.id.searchClear)
         val appList: RecyclerView = view.findViewById(R.id.appList)
         val dockBar: LinearLayout = view.findViewById(R.id.dockBar)
     }
@@ -339,9 +340,11 @@ class LauncherActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 appAdapter.filter(s?.toString().orEmpty())
+                holder.searchClear.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+        holder.searchClear.setOnClickListener { holder.searchBar.text.clear() }
 
         setupDock(holder.dockBar)
     }
