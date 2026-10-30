@@ -2,6 +2,13 @@
 
 A minimal Android launcher with a built-in calendar agenda view.
 
+## Screenshots
+
+<p>
+  <img src="docs/app-list.png" alt="App list with search" width="270">
+  <img src="docs/agenda.png" alt="Calendar agenda view" width="270">
+</p>
+
 ## Features
 
 - App list with accent-insensitive search
