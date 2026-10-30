@@ -29,6 +29,7 @@ import android.widget.LinearLayout
 import android.widget.TextClock
 import androidx.core.content.edit
 import androidx.core.net.toUri
+import java.util.concurrent.Executors
 
 class LauncherActivity : AppCompatActivity() {
 
@@ -42,6 +43,8 @@ class LauncherActivity : AppCompatActivity() {
     private var searchBar: EditText? = null
     private var calendarDays: Int = 7
     private var calendarHolder: CalendarViewHolder? = null
+    private val calendarExecutor = Executors.newSingleThreadExecutor()
+    private var calendarRequest = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,6 +84,7 @@ class LauncherActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         packageReceiver?.let { unregisterReceiver(it) }
+        calendarExecutor.shutdownNow()
     }
 
     private fun showOnboardingIfNeeded() {
@@ -98,8 +102,7 @@ class LauncherActivity : AppCompatActivity() {
                 .setTitle("Default launcher")
                 .setMessage("Set LaunchCal as your default launcher?")
                 .setPositiveButton("Yes") { _, _ ->
-                    val intent = Intent(android.provider.Settings.ACTION_HOME_SETTINGS)
-                    startActivity(intent)
+                    startActivity(Intent(android.provider.Settings.ACTION_HOME_SETTINGS))
                 }
                 .setNegativeButton("No", null)
                 .show()
@@ -120,11 +123,7 @@ class LauncherActivity : AppCompatActivity() {
     }
 
     private fun refreshCalendar() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-            val enabledIds = calendarPrefs.getEnabledCalendarIds()
-            val events = CalendarHelper.getUpcomingEvents(contentResolver, calendarDays, enabledIds)
-            calendarAdapter?.updateEvents(events)
-        }
+        calendarHolder?.let { loadCalendarEvents(it) }
     }
 
     private fun registerPackageReceiver() {
@@ -220,10 +219,18 @@ class LauncherActivity : AppCompatActivity() {
     private fun loadCalendarEvents(holder: CalendarViewHolder) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
             val enabledIds = calendarPrefs.getEnabledCalendarIds()
-            val events = CalendarHelper.getUpcomingEvents(contentResolver, calendarDays, enabledIds)
-            calendarAdapter?.updateEvents(events)
-            holder.empty.visibility = if (events.isEmpty()) View.VISIBLE else View.GONE
-            holder.list.visibility = if (events.isEmpty()) View.GONE else View.VISIBLE
+            val days = calendarDays
+            val request = ++calendarRequest
+            calendarExecutor.execute {
+                val events = CalendarHelper.getUpcomingEvents(contentResolver, days, enabledIds)
+                runOnUiThread {
+                    // A newer load superseded this one, or the activity is gone
+                    if (request != calendarRequest || isDestroyed) return@runOnUiThread
+                    calendarAdapter?.updateEvents(events)
+                    holder.empty.visibility = if (events.isEmpty()) View.VISIBLE else View.GONE
+                    holder.list.visibility = if (events.isEmpty()) View.GONE else View.VISIBLE
+                }
+            }
         } else {
             holder.empty.visibility = View.VISIBLE
             holder.list.visibility = View.GONE
