@@ -23,6 +23,6 @@
         android:layout_height="32dp"
         android:src="@drawable/ic_add_event"
         android:scaleType="centerInside"
-        android:contentDescription="Add event" />
+        android:contentDescription="@string/add_event" />
 
 </LinearLayout>

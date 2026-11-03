@@ -38,7 +38,7 @@ object CalendarHelper {
         return calendars
     }
 
-    fun getUpcomingEvents(contentResolver: ContentResolver, days: Int = 7, calendarIds: Set<Long>? = null): List<CalendarEvent> {
+    fun getUpcomingEvents(contentResolver: ContentResolver, days: Int = 7, calendarIds: Set<Long>? = null, untitled: String = ""): List<CalendarEvent> {
         val events = mutableListOf<CalendarEvent>()
         val now = Calendar.getInstance()
         val end = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, days) }
@@ -72,7 +72,7 @@ object CalendarHelper {
         cursor?.use {
             while (it.moveToNext()) {
                 val id = it.getLong(0)
-                val title = it.getString(1) ?: "No title"
+                val title = it.getString(1) ?: untitled
                 val startTime = it.getLong(2)
                 val endTime = it.getLong(3)
                 val allDay = it.getInt(4) == 1
