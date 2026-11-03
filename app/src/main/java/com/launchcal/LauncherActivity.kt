@@ -99,12 +99,12 @@ class LauncherActivity : AppCompatActivity() {
         val resolveInfo = packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
         if (resolveInfo?.activityInfo?.packageName != packageName) {
             AlertDialog.Builder(this)
-                .setTitle("Default launcher")
-                .setMessage("Set LaunchCal as your default launcher?")
-                .setPositiveButton("Yes") { _, _ ->
+                .setTitle(R.string.default_launcher_title)
+                .setMessage(R.string.default_launcher_message)
+                .setPositiveButton(android.R.string.yes) { _, _ ->
                     startActivity(Intent(android.provider.Settings.ACTION_HOME_SETTINGS))
                 }
-                .setNegativeButton("No", null)
+                .setNegativeButton(android.R.string.no, null)
                 .show()
         }
     }
@@ -202,7 +202,7 @@ class LauncherActivity : AppCompatActivity() {
             }
         }
 
-        calendarAdapter = CalendarAdapter(emptyList())
+        calendarAdapter = CalendarAdapter(resources, emptyList())
         holder.list.layoutManager = LinearLayoutManager(this)
         holder.list.adapter = calendarAdapter
 
@@ -223,7 +223,7 @@ class LauncherActivity : AppCompatActivity() {
             val days = calendarDays
             val request = ++calendarRequest
             calendarExecutor.execute {
-                val events = CalendarHelper.getUpcomingEvents(contentResolver, days, enabledIds)
+                val events = CalendarHelper.getUpcomingEvents(contentResolver, days, enabledIds, getString(R.string.no_title))
                 runOnUiThread {
                     // A newer load superseded this one, or the activity is gone
                     if (request != calendarRequest || isDestroyed) return@runOnUiThread
@@ -308,7 +308,7 @@ class LauncherActivity : AppCompatActivity() {
                     calendarHolder?.let { loadCalendarEvents(it) }
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 
@@ -406,19 +406,19 @@ class LauncherActivity : AppCompatActivity() {
         val names = apps.map { it.name }.toTypedArray()
 
         AlertDialog.Builder(this)
-            .setTitle("Choose dock app")
+            .setTitle(R.string.choose_dock_app)
             .setItems(names) { _, which ->
                 val app = apps[which]
                 dockManager.setSlot(slotIndex, app.packageName, app.activityName, app.name)
                 bindDockSlot(imageView, slotIndex)
             }
-            .setNeutralButton("Reset") { _, _ ->
+            .setNeutralButton(R.string.reset) { _, _ ->
                 getSharedPreferences("launcher", MODE_PRIVATE).edit {
                     remove("dock_slot_$slotIndex")
                 }
                 bindDockSlot(imageView, slotIndex)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 }

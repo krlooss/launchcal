@@ -12,6 +12,9 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
+private const val MENU_FAVORITE = 1
+private const val MENU_APP_INFO = 2
+
 class AppListAdapter(
     private var allApps: List<AppInfo>,
     private val favorites: FavoritesManager
@@ -65,24 +68,16 @@ class AppListAdapter(
         h.itemView.setOnLongClickListener { view ->
             val popup = PopupMenu(view.context, view)
             val isFav = favorites.isFavorite(app.packageName)
-            if (isFav) {
-                popup.menu.add("Remove from favorites")
-            } else {
-                popup.menu.add("Add to favorites")
-            }
-            popup.menu.add("App info")
+            popup.menu.add(0, MENU_FAVORITE, 0, if (isFav) R.string.remove_from_favorites else R.string.add_to_favorites)
+            popup.menu.add(0, MENU_APP_INFO, 0, R.string.app_info)
 
             popup.setOnMenuItemClickListener { menuItem ->
-                when (menuItem.title) {
-                    "Add to favorites" -> {
-                        favorites.add(app.packageName)
+                when (menuItem.itemId) {
+                    MENU_FAVORITE -> {
+                        if (isFav) favorites.remove(app.packageName) else favorites.add(app.packageName)
                         rebuild()
                     }
-                    "Remove from favorites" -> {
-                        favorites.remove(app.packageName)
-                        rebuild()
-                    }
-                    "App info" -> {
+                    MENU_APP_INFO -> {
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                             data = Uri.parse("package:${app.packageName}")
                         }

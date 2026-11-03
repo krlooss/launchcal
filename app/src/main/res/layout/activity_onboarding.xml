@@ -20,7 +20,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Welcome to LaunchCal"
+                android:text="@string/onboarding_title"
                 android:textColor="@android:color/white"
                 android:textSize="28sp"
                 android:textStyle="bold"
@@ -29,7 +29,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Swipe right"
+                android:text="@string/onboarding_swipe_title"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -38,7 +38,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="View your upcoming calendar events"
+                android:text="@string/onboarding_swipe_body"
                 android:textColor="#BBBBBB"
                 android:textSize="15sp"
                 android:paddingBottom="20dp" />
@@ -46,7 +46,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Long-press an app"
+                android:text="@string/onboarding_app_title"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -55,7 +55,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Add to favorites, view app info"
+                android:text="@string/onboarding_app_body"
                 android:textColor="#BBBBBB"
                 android:textSize="15sp"
                 android:paddingBottom="20dp" />
@@ -63,7 +63,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Long-press a dock icon"
+                android:text="@string/onboarding_dock_title"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -72,7 +72,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Replace it with any app"
+                android:text="@string/onboarding_dock_body"
                 android:textColor="#BBBBBB"
                 android:textSize="15sp"
                 android:paddingBottom="20dp" />
@@ -80,7 +80,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Search"
+                android:text="@string/onboarding_search_title"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -89,7 +89,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Works with or without accents"
+                android:text="@string/onboarding_search_body"
                 android:textColor="#BBBBBB"
                 android:textSize="15sp"
                 android:paddingBottom="20dp" />
@@ -97,7 +97,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Calendar gear icon"
+                android:text="@string/onboarding_gear_title"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -106,7 +106,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Choose which calendars to display"
+                android:text="@string/onboarding_gear_body"
                 android:textColor="#BBBBBB"
                 android:textSize="15sp"
                 android:paddingBottom="20dp" />
@@ -114,7 +114,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="+ on a day header"
+                android:text="@string/onboarding_plus_title"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -123,7 +123,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Create a new event on that day"
+                android:text="@string/onboarding_plus_body"
                 android:textColor="#BBBBBB"
                 android:textSize="15sp"
                 android:paddingBottom="20dp" />
@@ -135,7 +135,7 @@
         android:id="@+id/onboardingDismiss"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Got it"
+        android:text="@string/onboarding_got_it"
         android:textColor="@android:color/white"
         android:textSize="18sp"
         android:textStyle="bold"

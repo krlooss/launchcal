@@ -2,6 +2,7 @@ package com.launchcal
 
 import android.content.ContentUris
 import android.content.Intent
+import android.content.res.Resources
 import android.provider.CalendarContract
 import android.text.format.DateFormat
 import android.view.LayoutInflater
@@ -13,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.Calendar
 import java.util.Date
 
-class CalendarAdapter(events: List<CalendarEvent>) :
+class CalendarAdapter(private val resources: Resources, events: List<CalendarEvent>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private sealed class ListItem {
@@ -50,8 +51,8 @@ class CalendarAdapter(events: List<CalendarEvent>) :
         val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
 
         return when {
-            isSameDay(eventCal, today) -> "Today"
-            isSameDay(eventCal, tomorrow) -> "Tomorrow"
+            isSameDay(eventCal, today) -> resources.getString(R.string.today)
+            isSameDay(eventCal, tomorrow) -> resources.getString(R.string.tomorrow)
             else -> DateFormat.format("EEEE, d MMMM", Date(timeMillis)).toString()
                 .replaceFirstChar { it.uppercase() }
         }
@@ -94,7 +95,7 @@ class CalendarAdapter(events: List<CalendarEvent>) :
                 val h = holder as EventViewHolder
                 h.title.text = item.event.title
                 h.time.text = if (item.event.allDay) {
-                    "All day"
+                    resources.getString(R.string.all_day)
                 } else {
                     val start = DateFormat.format("HH:mm", Date(item.event.startTime))
                     val end = DateFormat.format("HH:mm", Date(item.event.endTime))
